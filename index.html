@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Materiales</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px; background-color: var(--tg-theme-bg-color, #f4f4f9); color: var(--tg-theme-text-color, #333); }
+        .header { font-size: 18px; font-weight: bold; margin-bottom: 12px; text-align: center; color: var(--tg-theme-button-color, #0088cc); }
+        .search-box { width: 100%; padding: 10px; font-size: 15px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; margin-bottom: 12px; }
+        .grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 70px; }
+        .card { background: var(--tg-theme-secondary-bg-color, #fff); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card-info { flex: 1; padding-right: 10px; }
+        .card-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+        .card-subtitle { font-size: 12px; color: #777; }
+        .qty-controls { display: flex; align-items: center; gap: 6px; }
+        .btn-qty { width: 34px; height: 34px; border-radius: 6px; border: none; background: var(--tg-theme-button-color, #0088cc); color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .input-qty { width: 48px; text-align: center; font-size: 15px; padding: 6px; border: 1px solid #ccc; border-radius: 6px; }
+        .footer-btn { position: fixed; bottom: 12px; left: 12px; right: 12px; background: var(--tg-theme-button-color, #28a745); color: var(--tg-theme-button-text-color, #fff); padding: 14px; text-align: center; border-radius: 10px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">📋 Pedido de Materiales Almacén</div>
+    <input type="text" id="search" class="search-box" placeholder="🔍 Buscar material o código..." onkeyup="filtrar()">
+    <div class="grid" id="lista-materiales"></div>
+    <div class="footer-btn" onclick="enviarPedido()">✅ ENVIAR SOLICITUD A ALMACÉN</div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const materiales = [
+            { id: "EQ01", nombre: "MODEM", desc: "Módem General (Equipos)" },
+            { id: "EQ02", nombre: "DECO", desc: "Decodificador General (Equipos)" },
+            { id: "1028", nombre: "ANTENA", desc: "Antena Parabólica 0.9m" },
+            { id: "1031", nombre: "CABLERG6 CON PORTANTE", desc: "Cable Coaxial c/Portante" },
+            { id: "3007", nombre: "CABLE BLANCO S/P", desc: "Cable Coaxial Blanco s/Portante" },
+            { id: "1034", nombre: "CONECTOR INTERNO", desc: "Conector RG6 EX Plus" },
+            { id: "1023", nombre: "CLAMP Q-SPAM", desc: "Clamp Q-Span" },
+            { id: "1045", nombre: "SPLITTER X2", desc: "Splitter 2 Vías Indoor" },
+            { id: "1046", nombre: "SPLITTER X3", desc: "Splitter 3 Vías Indoor" },
+            { id: "10", nombre: "GRAMPAS", desc: "Grampas plásticas pared" },
+            { id: "14", nombre: "MARQUILLAS", desc: "Marquillas numéricas" },
+            { id: "13", nombre: "TUBO PASACABLE", desc: "Tubo pasacable" },
+            { id: "17", nombre: "CINTA AISLANTE", desc: "Cinta aislante negra" },
+            { id: "18", nombre: "VULCANIZANTE", desc: "Cinta vulcanizante" }
+        ];
+
+        let cantidades = {};
+
+        function render() {
+            const cont = document.getElementById("lista-materiales");
+            cont.innerHTML = "";
+            materiales.forEach(m => {
+                const cant = cantidades[m.id] || 0;
+                cont.innerHTML += `
+                    <div class="card" data-nombre="${m.nombre.toLowerCase()} ${m.desc.toLowerCase()}">
+                        <div class="card-info">
+                            <div class="card-title">${m.nombre}</div>
+                            <div class="card-subtitle">${m.desc}</div>
+                        </div>
+                        <div class="qty-controls">
+                            <button class="btn-qty" onclick="cambiar('${m.id}', -1)">-</button>
+                            <input type="number" class="input-qty" id="input-${m.id}" value="${cant}" onchange="setCant('${m.id}', this.value)">
+                            <button class="btn-qty" onclick="cambiar('${m.id}', 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function cambiar(id, delta) {
+            cantidades[id] = Math.max(0, (cantidades[id] || 0) + delta);
+            document.getElementById(`input-${id}`).value = cantidades[id];
+        }
+
+        function setCant(id, val) {
+            cantidades[id] = Math.max(0, parseInt(val) || 0);
+        }
+
+        function filtrar() {
+            const q = document.getElementById("search").value.toLowerCase();
+            document.querySelectorAll(".card").forEach(c => {
+                c.style.display = c.getAttribute("data-nombre").includes(q) ? "flex" : "none";
+            });
+        }
+
+        function enviarPedido() {
+            let res = [];
+            for (let id in cantidades) {
+                if (cantidades[id] > 0) {
+                    let m = materiales.find(x => x.id === id);
+                    res.push({ nombre: m.nombre, cantidad: cantidades[id] });
+                }
+            }
+            if (res.length === 0) {
+                alert("Por favor ingrese la cantidad de al menos un material.");
+                return;
+            }
+            tg.sendData(JSON.stringify(res));
+        }
+
+        render();
+    </script>
+</body>
+</html>
