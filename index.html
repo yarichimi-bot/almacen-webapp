@@ -1,161 +1,199 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Materiales</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 12px; background-color: var(--tg-theme-bg-color, #17212b); color: var(--tg-theme-text-color, #f5f5f5); }
-        .header { font-size: 18px; font-weight: bold; margin-bottom: 10px; text-align: center; color: #64b5f6; }
-        .search-box { width: 100%; padding: 10px; font-size: 15px; border-radius: 8px; border: 1px solid #334455; background: #232e3c; color: #fff; box-sizing: border-box; margin-bottom: 10px; }
-        .tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 4px; }
-        .tab-btn { padding: 6px 12px; border-radius: 16px; border: none; background: #232e3c; color: #aaa; font-size: 13px; cursor: pointer; white-space: nowrap; }
-        .tab-btn.active { background: #1a73e8; color: #fff; font-weight: bold; }
-        .grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 80px; }
-        .card { background: #232e3c; border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2c3a4a; }
-        .card-info { flex: 1; padding-right: 10px; }
-        .card-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; color: #fff; }
-        .card-subtitle { font-size: 11px; color: #8e9dcc; }
-        .qty-controls { display: flex; align-items: center; gap: 6px; }
-        .btn-qty { width: 34px; height: 34px; border-radius: 6px; border: none; background: #1a73e8; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
-        .input-qty { width: 50px; text-align: center; font-size: 15px; padding: 6px; border: 1px solid #3a4b5c; background: #17212b; color: #fff; border-radius: 6px; }
-        .footer-btn { position: fixed; bottom: 12px; left: 12px; right: 12px; background: #1a73e8; color: #fff; padding: 14px; text-align: center; border-radius: 10px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); cursor: pointer; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Requerimiento de Materiales - DataRed</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 15px;
+      color: #333;
+    }
+    h2 {
+      text-align: center;
+      color: #1f497d;
+      margin-bottom: 5px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .card-tecnico {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border-left: 4px solid #1f497d;
+    }
+    .card-tecnico label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #1f497d;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .card-tecnico input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .card-tecnico input:focus {
+      border-color: #1f497d;
+    }
+    .item-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .item-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #2c3e50;
+      max-width: 65%;
+    }
+    .counter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-count {
+      background: #1f497d;
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-count:active {
+      transform: scale(0.95);
+    }
+    .count-val {
+      font-size: 15px;
+      font-weight: bold;
+      width: 24px;
+      text-align: center;
+    }
+    .btn-send {
+      width: 100%;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <div class="header">📋 Pedido de Materiales Almacén</div>
-    <input type="text" id="search" class="search-box" placeholder="🔍 Buscar por nombre o código..." onkeyup="filtrar()">
-    
-    <div class="tabs">
-        <button class="tab-btn active" onclick="filtrarCat('TODOS', this)">TODOS</button>
-        <button class="tab-btn" onclick="filtrarCat('EQUIPOS', this)">EQUIPOS</button>
-        <button class="tab-btn" onclick="filtrarCat('1. DTH', this)">DTH</button>
-        <button class="tab-btn" onclick="filtrarCat('2. HFC', this)">HFC</button>
-        <button class="tab-btn" onclick="filtrarCat('3. FTTH', this)">FTTH</button>
-        <button class="tab-btn" onclick="filtrarCat('6.SIN ITEM', this)">SIN ITEM</button>
-    </div>
 
-    <div class="grid" id="lista-materiales"></div>
-    <div class="footer-btn" onclick="enviarPedido()">✅ ENVIAR SOLICITUD A ALMACÉN</div>
+  <h2>DATARED GROUP HFC</h2>
+  <div class="subtitle">Solicitud de Materiales de Almacén</div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+  <div class="card-tecnico">
+    <label for="nombreTecnico">👤 NOMBRE Y APELLIDO DEL TÉCNICO:</label>
+    <input type="text" id="nombreTecnico" placeholder="Ej: FRANZ BETO YARICHIMI CARTAGENA">
+  </div>
 
-        const materiales = [
-            {"id": "EQ01", "nombre": "MODEM", "desc": "Módem General (Equipos)", "cat": "EQUIPOS"},
-            {"id": "EQ02", "nombre": "DECO", "desc": "Decodificador General (Equipos)", "cat": "EQUIPOS"},
-            {"id": "3076", "nombre": "FLEXSWITCH AMPLIFICADOR", "desc": "FLEXSWITCH AMPLIFICADOR", "cat": "1. DTH"},
-            {"id": "1028", "nombre": "ANTENA", "desc": "ANTENA PARABOLICA 0,9M INC REFLECTOR/BASE/SOPORTE", "cat": "1. DTH"},
-            {"id": "1062", "nombre": "ANTENA OFF-SET", "desc": "PS90G ANTENA PARABOLICA OFFSET", "cat": "1. DTH"},
-            {"id": "3081", "nombre": "DERIVADOR ICT 1 DERIV. 10DB", "desc": "DERIVADOR ICT 1 DERIV. 10DB 5-2400 MHZ", "cat": "1. DTH"},
-            {"id": "3082", "nombre": "DERIVADOR ICT 1 DERIV. 15DB", "desc": "DERIVADOR ICT 1 DERIV. 15DB 5-2400 MHZ", "cat": "1. DTH"},
-            {"id": "3075", "nombre": "FLEXSWITCH DISTRIBUIDOR", "desc": "FLEXSWITCH DISTRIBUIDOR 2 SALIDAS", "cat": "1. DTH"},
-            {"id": "1026", "nombre": "HDMI", "desc": "6 FTJUMPER CABLE HDMI TO HDMI", "cat": "1. DTH"},
-            {"id": "3030", "nombre": "HDMI PREMIUM 1", "desc": "JUMPER CABLE HDMI PREMIUM 6FT", "cat": "1. DTH"},
-            {"id": "1024", "nombre": "LNBX2", "desc": "LNB DOBLE BANDA KU UNIVERSAL", "cat": "1. DTH"},
-            {"id": "1059", "nombre": "LNBX4", "desc": "LNB QUAD, KU BAND UNIVERSAL GKF-D24H", "cat": "1. DTH"},
-            {"id": "3074", "nombre": "CONVERSOR LNB QUATTRO", "desc": "CONVERSOR LNB QUATTRO POLARIDADES", "cat": "1. DTH"},
-            {"id": "1025", "nombre": "RCA", "desc": "6 FTJUMPER CABLE RCA TO RCA", "cat": "1. DTH"},
-            {"id": "3080", "nombre": "SPLITTER ICT 2 SALIDAS", "desc": "REPARTIDOR/SPLITTER ICT 2 SALIDAS, 5-2400 MHZ", "cat": "1. DTH"},
-            {"id": "1031", "nombre": "CABLERG6 CON PORTANTE", "desc": "CABLE TRISHIELD RG-6 AL 60% CON PORTANTE SIN GEL", "cat": "2. HFC"},
-            {"id": "1032", "nombre": "CABLERG6 SIN PORTANTE", "desc": "RG06 TRISHIELD CABLE (WITHOUT MESSENGER)", "cat": "2. HFC"},
-            {"id": "3007", "nombre": "CABLE BLANCO S/P", "desc": "RG6 60% WHITE CABLE", "cat": "2. HFC"},
-            {"id": "1023", "nombre": "CLAMP Q-SPAM", "desc": "CLAMP, Q SPAN", "cat": "2. HFC"},
-            {"id": "1034", "nombre": "CONECTOR INTERNO", "desc": "CONNECTOR, RG6 EX PLUS", "cat": "2. HFC"},
-            {"id": "1041", "nombre": "FILTRO", "desc": "FILTER, ARCOM 5/72 BAND REJECT", "cat": "2. HFC"},
-            {"id": "1045", "nombre": "SPLITTER X2", "desc": "SPLITTER, 2WAY INDOOR", "cat": "2. HFC"},
-            {"id": "1046", "nombre": "SPLITTER X3", "desc": "SPLITTER, 3WAY INDOOR", "cat": "2. HFC"},
-            {"id": "1027", "nombre": "AMPLIFICADOR 15DB", "desc": "HOUSEHOLD AMPLIFIER 15 DB 1 GHZ C / RETURN PSIVO", "cat": "2. HFC"},
-            {"id": "1029", "nombre": "ATENUADOR 10 DB", "desc": "ATEN.D / LIN.DOMICIL. 10 DB", "cat": "2. HFC"},
-            {"id": "2087", "nombre": "CARGA TERMINAL 75 Ohm", "desc": "COAX SURGE PROTECTION 75 OHM FEMALE TO DEMALE", "cat": "2. HFC"},
-            {"id": "3050", "nombre": "CABLE UTP", "desc": "UTP CABLE CAT 6 (FOR INTERIORS)", "cat": "3. FTTH"},
-            {"id": "3049", "nombre": "ROSETA", "desc": "HTB2-1F-SCAP-A1-P0-EXP-ROSETA HTB2", "cat": "3. FTTH"},
-            {"id": "3047", "nombre": "CONECTOR APC", "desc": "CONECTOR DE CAMPO SC/APC IEC 61754-4,MECHANICAL", "cat": "3. FTTH"},
-            {"id": "3044", "nombre": "CONECTOR RJ45", "desc": "CONNECTOR RJ45 CAT6A NETWORK CABLES", "cat": "3. FTTH"},
-            {"id": "3045", "nombre": "DROP100", "desc": "PRECONNECTED FLAT DROP MESSENGER 100M", "cat": "3. FTTH"},
-            {"id": "3046", "nombre": "DROP200", "desc": "PRECONNECTED FLAT DROP MESSENGER 200M", "cat": "3. FTTH"},
-            {"id": "3048", "nombre": "PATCHCORD", "desc": "PATCHCORD FO SC-APC/SC-APC 3M MONOMODE SIMPLEX 3MM", "cat": "3. FTTH"},
-            {"id": "3062", "nombre": "TENSORES", "desc": "91755XP 5/35 XB CLAMP F/ROUND CABLE 3-6MM LONG/SPK", "cat": "3. FTTH"},
-            {"id": "10", "nombre": "GRAMPAS", "desc": "GRAMPAS PLASTICAS PARA PARED", "cat": "6.SIN ITEM"},
-            {"id": "11", "nombre": "PRECINTOS", "desc": "PRECINTOS NEGROS", "cat": "6.SIN ITEM"},
-            {"id": "12", "nombre": "TIGO", "desc": "PRECINTO TIGO", "cat": "6.SIN ITEM"},
-            {"id": "13", "nombre": "TUBO", "desc": "TUBO PASACABLE", "cat": "6.SIN ITEM"},
-            {"id": "14", "nombre": "MARQUILLAS", "desc": "MARQUILLAS NUMERICAS IDENTIFICADOR", "cat": "6.SIN ITEM"},
-            {"id": "15", "nombre": "PERNO", "desc": "PERNOS PARA ANTENA", "cat": "6.SIN ITEM"},
-            {"id": "16", "nombre": "TARUGO", "desc": "TARUGOS PARA PERNO DE ANTENA", "cat": "6.SIN ITEM"},
-            {"id": "17", "nombre": "CINTA AISLANTE", "desc": "CINTA AISLANTE NEGRO", "cat": "6.SIN ITEM"},
-            {"id": "18", "nombre": "VULCANIZANTE", "desc": "CINTA AISLANTE VULCANIZANTE", "cat": "6.SIN ITEM"}
-        ];
+  <div id="lista-materiales"></div>
 
-        let cantidades = {};
-        let catActual = 'TODOS';
+  <button class="btn-send" onclick="enviarPedido()">✅ ENVIAR SOLICITUD A ALMACÉN</button>
 
-        function render() {
-            const cont = document.getElementById("lista-materiales");
-            cont.innerHTML = "";
-            materiales.forEach(m => {
-                if (m.nombre.startsWith('RET-')) return;
-                const cant = cantidades[m.id] || 0;
-                cont.innerHTML += `
-                    <div class="card" data-cat="${m.cat}" data-nombre="${m.nombre.toLowerCase()} ${m.desc.toLowerCase()} ${m.id}">
-                        <div class="card-info">
-                            <div class="card-title">${m.nombre}</div>
-                            <div class="card-subtitle">[${m.cat}] ${m.desc}</div>
-                        </div>
-                        <div class="qty-controls">
-                            <button class="btn-qty" onclick="cambiar('${m.id}', -1)">-</button>
-                            <input type="number" class="input-qty" id="input-${m.id}" value="${cant}" onchange="setCant('${m.id}', this.value)">
-                            <button class="btn-qty" onclick="cambiar('${m.id}', 1)">+</button>
-                        </div>
-                    </div>
-                `;
-            });
-            filtrar();
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // Precargar el nombre del usuario de Telegram como valor inicial sugerido
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      const u = tg.initDataUnsafe.user;
+      document.getElementById('nombreTecnico').value = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+    }
+
+    const CATALOGO = [
+      "GRAMPAS", "PRECINTOS", "TIGO", "MARQUILLAS", "PERNO", "TARUGO",
+      "CINTA AISLANTE", "VULCANIZANTE", "CLAMP Q-SPAM", "RCA",
+      "CABLE RG6 CON PORTANTE", "CABLE RG6 SIN PORTANTE", "CONECTOR INTERNO",
+      "SPLITTER X2", "SPLITTER X3", "CARGA TERMINAL 75 Ohm", "HDMI PREMIUM 1",
+      "MODEM", "DECO"
+    ];
+
+    const pedido = {};
+    CATALOGO.forEach(item => pedido[item] = 0);
+
+    const contenedor = document.getElementById('lista-materiales');
+
+    function render() {
+      contenedor.innerHTML = '';
+      CATALOGO.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <span class="item-name">${item}</span>
+          <div class="counter">
+            <button class="btn-count" onclick="cambiar('${item}', -1)">-</button>
+            <span class="count-val">${pedido[item]}</span>
+            <button class="btn-count" onclick="cambiar('${item}', 1)">+</button>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    function cambiar(item, delta) {
+      pedido[item] = Math.max(0, pedido[item] + delta);
+      render();
+    }
+
+    function enviarPedido() {
+      const nombreInput = document.getElementById('nombreTecnico').value.trim();
+      
+      if (!nombreInput) {
+        alert("⚠️ Por favor ingrese su Nombre y Apellido completo antes de enviar.");
+        return;
+      }
+
+      const seleccionados = [];
+      for (const [nombre, cantidad] of Object.entries(pedido)) {
+        if (cantidad > 0) {
+          seleccionados.push({ nombre, cantidad });
         }
+      }
 
-        function cambiar(id, delta) {
-            cantidades[id] = Math.max(0, (cantidades[id] || 0) + delta);
-            document.getElementById(`input-${id}`).value = cantidades[id];
-        }
+      if (seleccionados.length === 0) {
+        alert("⚠️ Por favor seleccione al menos un material.");
+        return;
+      }
 
-        function setCant(id, val) {
-            cantidades[id] = Math.max(0, parseInt(val) || 0);
-        }
+      const payload = {
+        tecnico: nombreInput,
+        items: seleccionados
+      };
 
-        function filtrarCat(cat, btn) {
-            catActual = cat;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            filtrar();
-        }
+      tg.sendData(JSON.stringify(payload));
+    }
 
-        function filtrar() {
-            const q = document.getElementById("search").value.toLowerCase();
-            document.querySelectorAll(".card").forEach(c => {
-                const matchCat = (catActual === 'TODOS' || c.getAttribute("data-cat") === catActual);
-                const matchName = c.getAttribute("data-nombre").includes(q);
-                c.style.display = (matchCat && matchName) ? "flex" : "none";
-            });
-        }
-
-        function enviarPedido() {
-            let res = [];
-            for (let id in cantidades) {
-                if (cantidades[id] > 0) {
-                    let m = materiales.find(x => x.id === id);
-                    res.push({ nombre: m.nombre, cantidad: cantidades[id] });
-                }
-            }
-            if (res.length === 0) {
-                alert("Por favor ingrese la cantidad de al menos un material.");
-                return;
-            }
-            tg.sendData(JSON.stringify(res));
-        }
-
-        render();
-    </script>
+    render();
+  </script>
 </body>
 </html>
