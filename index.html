@@ -15,28 +15,7 @@
       padding-bottom: 40px;
     }
     h2 { text-align: center; color: #1f497d; margin: 5px 0 2px 0; font-size: 18px; }
-    .subtitle { text-align: center; font-size: 11px; color: #666; margin-bottom: 10px; }
-    
-    .nav-modes {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-    .mode-btn {
-      padding: 10px;
-      background: #e2e8f0;
-      color: #4a5568;
-      border: none;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-    }
-    .mode-btn.active-pedido { background: #1f497d; color: white; }
-    .mode-btn.active-danado { background: #d97706; color: white; }
-    .mode-btn.active-retiro { background: #c05621; color: white; }
+    .subtitle { text-align: center; font-size: 11px; color: #666; margin-bottom: 12px; }
 
     .card-tecnico {
       background: #ffffff;
@@ -44,15 +23,15 @@
       border-radius: 10px;
       margin-bottom: 12px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      border-left: 4px solid #1f497d;
+      border-left: 5px solid #1f497d;
     }
     .card-tecnico label { font-size: 11px; font-weight: bold; color: #1f497d; display: block; margin-bottom: 4px; }
     .card-tecnico input, .card-tecnico textarea {
-      width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; box-sizing: border-box; outline: none; margin-bottom: 8px;
+      width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; box-sizing: border-box; outline: none; margin-bottom: 8px; font-family: inherit;
     }
 
     .tabs-container { display: flex; gap: 5px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
-    .tab-btn { flex: 1; white-space: nowrap; padding: 8px 10px; background: #e2e8f0; color: #4a5568; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; }
+    .tab-btn { flex: 1; white-space: nowrap; padding: 8px 10px; background: #e2e8f0; color: #4a5568; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
     .tab-btn.active { background: #1f497d; color: white; }
 
     .item-card { background: #fff; border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -61,20 +40,22 @@
     .item-cat { font-size: 10px; color: #888; margin-top: 2px; }
 
     .counter { display: flex; align-items: center; gap: 6px; }
-    .btn-count { background: #1f497d; color: white; border: none; width: 32px; height: 32px; border-radius: 6px; font-size: 16px; font-weight: bold; }
-    .input-cant { width: 55px; height: 32px; text-align: center; font-size: 14px; font-weight: bold; border: 1px solid #cbd5e1; border-radius: 6px; }
+    .btn-count { background: #1f497d; color: white; border: none; width: 32px; height: 32px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .input-cant { width: 55px; height: 32px; text-align: center; font-size: 14px; font-weight: bold; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; }
 
     .btn-send { width: 100%; background: #28a745; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: bold; margin-top: 15px; cursor: pointer; }
 
+    /* Modal Resumen */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
     .modal-content { background: #fff; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); max-height: 85vh; display: flex; flex-direction: column; }
-    .modal-title { font-size: 16px; font-weight: bold; color: #1f497d; text-align: center; margin-bottom: 10px; }
-    .modal-tech { font-size: 13px; color: #555; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-    .resumen-lista { overflow-y: auto; max-height: 200px; margin-bottom: 15px; border: 1px solid #edf2f7; border-radius: 6px; padding: 8px; background: #f8fafc; }
+    .modal-title { font-size: 15px; font-weight: bold; color: #1f497d; text-align: center; margin-bottom: 10px; }
+    .modal-tech { font-size: 12px; color: #555; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+    .resumen-lista { overflow-y: auto; max-height: 180px; margin-bottom: 15px; border: 1px solid #edf2f7; border-radius: 6px; padding: 8px; background: #f8fafc; }
     .resumen-item { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #e2e8f0; }
-    .modal-buttons { display: flex; gap: 10px; }
-    .btn-modal-cancel { flex: 1; background: #e2e8f0; color: #4a5568; border: none; padding: 12px; border-radius: 8px; font-weight: bold; }
-    .btn-modal-confirm { flex: 1; background: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; }
+    .modal-buttons { display: flex; gap: 8px; }
+    .btn-modal-cancel { flex: 1; background: #e53e3e; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
+    .btn-modal-modify { flex: 1; background: #cbd5e1; color: #334155; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
+    .btn-modal-confirm { flex: 1.2; background: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -82,19 +63,13 @@
   <h2 id="tituloPrincipal">DATARED GROUP HFC</h2>
   <div class="subtitle" id="subtituloPrincipal">Módulo Oficial de Gestión</div>
 
-  <div class="nav-modes">
-    <button class="mode-btn active-pedido" id="btnM1" onclick="setModo('PEDIDO')">📋 1. REQUERIMIENTO DE MATERIALES</button>
-    <button class="mode-btn" id="btnM2" onclick="setModo('DANADO')">🛠️ 2. DEVOLUCIÓN MATERIAL DAÑADO</button>
-    <button class="mode-btn" id="btnM3" onclick="setModo('RETIRO')">📦 3. ACTA DE RETIRO MASIVO</button>
-  </div>
-
   <div class="card-tecnico" id="boxTec">
     <label for="nombreTecnico">👤 NOMBRE Y APELLIDO DEL TÉCNICO:</label>
     <input type="text" id="nombreTecnico" placeholder="Ej: FRANZ BETO YARICHIMI CARTAGENA">
     
     <div id="boxMotivo" style="display:none;">
       <label for="detalleMotivo" id="lblMotivo">✍️ DETALLE / OBS.:</label>
-      <textarea id="detalleMotivo" rows="2" placeholder="Describa el motivo..."></textarea>
+      <textarea id="detalleMotivo" rows="2" placeholder="Describa la observación..."></textarea>
     </div>
   </div>
 
@@ -116,8 +91,9 @@
       <div class="modal-tech" id="mTec"></div>
       <div class="resumen-lista" id="mItems"></div>
       <div class="modal-buttons">
-        <button class="btn-modal-cancel" onclick="cerrarModal()">✏️ Modificar</button>
-        <button class="btn-modal-confirm" id="btnConf" onclick="confirmarEnvio()">🚀 Confirmar y Enviar</button>
+        <button class="btn-modal-cancel" onclick="cancelarYSalir()">❌ Cancelar</button>
+        <button class="btn-modal-modify" onclick="cerrarModal()">✏️ Editar</button>
+        <button class="btn-modal-confirm" id="btnConf" onclick="confirmarEnvio()">🚀 Confirmar</button>
       </div>
     </div>
   </div>
@@ -126,40 +102,46 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
+    // Obtener parámetro de modo desde la URL (?modo=PEDIDO)
+    const urlParams = new URLSearchParams(window.location.search);
+    let modoActual = urlParams.get('modo') || "PEDIDO";
+
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
       const u = tg.initDataUnsafe.user;
       document.getElementById('nombreTecnico').value = `${u.first_name || ''} ${u.last_name || ''}`.trim();
     }
 
-    let modoActual = "PEDIDO";
-
-    function setModo(m) {
-      modoActual = m;
-      document.getElementById('btnM1').className = "mode-btn" + (m === 'PEDIDO' ? ' active-pedido' : '');
-      document.getElementById('btnM2').className = "mode-btn" + (m === 'DANADO' ? ' active-danado' : '');
-      document.getElementById('btnM3').className = "mode-btn" + (m === 'RETIRO' ? ' active-retiro' : '');
-
+    function aplicarEstiloModo() {
       const boxMot = document.getElementById('boxMotivo');
       const btnE = document.getElementById('btnEnviar');
       const boxT = document.getElementById('boxTec');
+      const tit = document.getElementById('tituloPrincipal');
+      const sub = document.getElementById('subtituloPrincipal');
 
-      if (m === 'PEDIDO') {
+      if (modoActual === 'DANADO') {
+        tit.innerText = "DEVOLUCIÓN DE MATERIAL DAÑADO";
+        sub.innerText = "Acta de Equipos / Materiales Con Falla";
+        boxMot.style.display = 'block';
+        document.getElementById('lblMotivo').innerText = '✍️ MOTIVO DE LA FALLA / DAÑO:';
+        btnE.innerText = '🛠️ REVISAR Y CONFIRMAR DAÑADOS';
+        btnE.style.background = '#d97706';
+        boxT.style.borderLeftColor = '#d97706';
+      } else if (modoActual === 'RETIRO') {
+        tit.innerText = "ACTA DE RETIRO MASIVO";
+        sub.innerText = "Lote de Bajas de Equipos de Campo";
+        boxMot.style.display = 'block';
+        document.getElementById('lblMotivo').innerText = '✍️ DETALLE DEL RETIRO MASIVO (BAJAS):';
+        btnE.innerText = '📦 REVISAR Y CONFIRMAR RETIROS';
+        btnE.style.background = '#c05621';
+        boxT.style.borderLeftColor = '#c05621';
+      } else {
+        modoActual = 'PEDIDO';
+        tit.innerText = "REQUERIMIENTO DE MATERIALES";
+        sub.innerText = "Solicitud Oficial de Almacén";
         boxMot.style.display = 'none';
         btnE.innerText = '📋 REVISAR Y CONFIRMAR REQUERIMIENTO';
         btnE.style.background = '#1f497d';
         boxT.style.borderLeftColor = '#1f497d';
-      } else if (m === 'DANADO') {
-        boxMot.style.display = 'block';
-        document.getElementById('lblMotivo').innerText = '✍️ MOTIVO DE LA FALLA / DAÑO:';
-        btnE.innerText = '🛠️ CONFIRMAR DEVOLUCIÓN DE DAÑADOS';
-        btnE.style.background = '#d97706';
-        boxT.style.borderLeftColor = '#d97706';
-      } else {
-        boxMot.style.display = 'block';
-        document.getElementById('lblMotivo').innerText = '✍️ DETALLE DEL RETIRO MASIVO (BAJAS):';
-        btnE.innerText = '📦 CONFIRMAR ACTA DE RETIRO MASIVO';
-        btnE.style.background = '#c05621';
-        boxT.style.borderLeftColor = '#c05621';
       }
     }
 
@@ -283,7 +265,7 @@
       const mot = document.getElementById('detalleMotivo').value.trim() || "Sin observaciones";
 
       document.getElementById('mTitulo').innerText = modoActual === "PEDIDO" ? "📋 RESUMEN REQUERIMIENTO" : (modoActual === "DANADO" ? "🛠️ RESUMEN MATERIAL DAÑADO" : "📦 RESUMEN ACTA DE RETIRO");
-      document.getElementById('mTec').innerHTML = `<b>Técnico:</b> ${nom} <br><b>Modo:</b> ${modoActual} <br><b>Obs:</b> ${mot}`;
+      document.getElementById('mTec').innerHTML = `<b>Técnico:</b> ${nom} <br><b>Obs:</b> ${mot}`;
 
       const l = document.getElementById('mItems');
       l.innerHTML = '';
@@ -294,7 +276,14 @@
       document.getElementById('modalResumen').style.display = 'flex';
     }
 
-    function cerrarModal() { document.getElementById('modalResumen').style.display = 'none'; }
+    function cerrarModal() { 
+      document.getElementById('modalResumen').style.display = 'none'; 
+    }
+
+    function cancelarYSalir() {
+      const payload = { accion: "CANCELAR", modo: modoActual };
+      tg.sendData(JSON.stringify(payload));
+    }
 
     function confirmarEnvio() {
       const nom = document.getElementById('nombreTecnico').value.trim();
@@ -304,10 +293,11 @@
         if (v > 0) sel.push({ nombre: k, cantidad: v });
       }
 
-      const payload = { modo: modoActual, tecnico: nom, motivo: mot, items: sel };
+      const payload = { accion: "CONFIRMAR", modo: modoActual, tecnico: nom, motivo: mot, items: sel };
       tg.sendData(JSON.stringify(payload));
     }
 
+    aplicarEstiloModo();
     render();
   </script>
 </body>
