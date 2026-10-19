@@ -188,7 +188,7 @@
       margin-bottom: 4px;
     }
     .file-info {
-      font-size: 11px;
+      font-size: 10px;
       color: #b45309;
       margin-top: 2px;
       font-style: italic;
@@ -286,14 +286,13 @@
     <label for="nombreTecnico">👤 NOMBRE Y APELLIDO DEL TÉCNICO:</label>
     <input type="text" id="nombreTecnico" placeholder="Ej: FRANZ BETO YARICHIMI CARTAGENA">
     
-    <!-- Bloque Devolución con Texto Libre y Múltiples Fotos -->
     <div class="seccion-devolucion" id="bloqueDevolucion">
       <label for="detalleMotivo">✍️ MOTIVO / DETALLE DE LA DEVOLUCIÓN:</label>
-      <textarea id="detalleMotivo" rows="2" placeholder="Ej: Retiro por cliente dado de baja, módem quemado por tormenta, etc."></textarea>
+      <textarea id="detalleMotivo" rows="2" placeholder="Ej: Devolución masiva de retiros semanales / equipos dañados"></textarea>
       
-      <label for="fotosEvidencia">📸 FOTOS DE EVIDENCIA (MÚLTIPLES FOTOS):</label>
+      <label for="fotosEvidencia">📸 FOTOS DE EVIDENCIA (SIN LÍMITE):</label>
       <input type="file" id="fotosEvidencia" accept="image/*" multiple>
-      <div class="file-info">Puedes seleccionar varias fotos a la vez (equipos, etiquetas MAC, etc.)</div>
+      <div class="file-info" id="txtConteoFotos">Puedes seleccionar todas las fotos que necesites (Lote de 10 a 40+ fotos).</div>
     </div>
   </div>
 
@@ -486,6 +485,11 @@
       return seleccionados;
     }
 
+    document.getElementById('fotosEvidencia').addEventListener('change', function(e) {
+      const cantidad = e.target.files.length;
+      document.getElementById('txtConteoFotos').innerText = `📸 Has seleccionado ${cantidad} foto(s) para esta devolución.`;
+    });
+
     function previsualizarPedido() {
       const nombreInput = document.getElementById('nombreTecnico').value.trim();
       if (!nombreInput) {
@@ -522,33 +526,75 @@
       document.getElementById('modalResumen').style.display = 'none';
     }
 
+    function comprimirLoteUltraRápido(files, callback) {
+      const comprimidas = [];
+      let contador = 0;
+
+      if (!files || files.length === 0) {
+        callback([]);
+        return;
+      }
+
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_DIM = 500; // Resolución optimizada para reporte
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_DIM) {
+                height *= MAX_DIM / width;
+                width = MAX_DIM;
+              }
+            } else {
+              if (height > MAX_DIM) {
+                width *= MAX_DIM / height;
+                height = MAX_DIM;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            comprimidas.push(canvas.toDataURL('image/jpeg', 0.4)); // 40% calidad, ultra ligero (<25KB por foto)
+            contador++;
+
+            if (contador === files.length) {
+              callback(comprimidas);
+            }
+          };
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     function enviarPedidoFinal() {
+      const btn = document.getElementById('btnModalConfirmar');
+      btn.innerText = "⏳ Procesando lote de fotos...";
+      btn.disabled = true;
+
       const nombreInput = document.getElementById('nombreTecnico').value.trim();
       const seleccionados = obtenerSeleccionados();
       const motivo = document.getElementById('detalleMotivo').value.trim() || "Sin detalles específicos";
       const fileInput = document.getElementById('fotosEvidencia');
 
       if (modoActual === "DEVOLUCION" && fileInput.files && fileInput.files.length > 0) {
-        let archivosProcesados = 0;
-        const base64Images = [];
-
-        Array.from(fileInput.files).forEach((file, index) => {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            base64Images.push(e.target.result);
-            archivosProcesados++;
-            if (archivosProcesados === fileInput.files.length) {
-              enviarPayloadAlBot(nombreInput, seleccionados, motivo, base64Images);
-            }
-          };
-          reader.readAsDataURL(file);
+        comprimirLoteUltraRápido(fileInput.files, function(fotosProcesadas) {
+          despacharPayload(nombreInput, seleccionados, motivo, fotosProcesadas);
         });
       } else {
-        enviarPayloadAlBot(nombreInput, seleccionados, motivo, []);
+        despacharPayload(nombreInput, seleccionados, motivo, []);
       }
     }
 
-    function enviarPayloadAlBot(tecnico, items, motivo, fotos) {
+    function despacharPayload(tecnico, items, motivo, fotos) {
       const payload = {
         modo: modoActual,
         tecnico: tecnico,
