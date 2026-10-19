@@ -12,13 +12,14 @@
       margin: 0;
       padding: 12px;
       color: #333;
+      padding-bottom: 40px;
     }
     h2 {
       text-align: center;
       color: #1f497d;
       margin-top: 5px;
       margin-bottom: 2px;
-      font-size: 20px;
+      font-size: 19px;
     }
     .subtitle {
       text-align: center;
@@ -50,10 +51,9 @@
       box-sizing: border-box;
       outline: none;
     }
-    /* Pestañas de Tecnología */
     .tabs-container {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       margin-bottom: 12px;
       overflow-x: auto;
       padding-bottom: 4px;
@@ -61,7 +61,7 @@
     .tab-btn {
       flex: 1;
       white-space: nowrap;
-      padding: 8px 12px;
+      padding: 8px 10px;
       background: #e2e8f0;
       color: #4a5568;
       border: none;
@@ -78,7 +78,7 @@
     .item-card {
       background: #fff;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 8px 12px;
       margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
@@ -88,7 +88,7 @@
     .item-info {
       display: flex;
       flex-direction: column;
-      max-width: 65%;
+      max-width: 58%;
     }
     .item-name {
       font-weight: 600;
@@ -103,38 +103,39 @@
     .counter {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .btn-count {
       background: #1f497d;
       color: white;
       border: none;
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 6px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
     }
-    .btn-count:active {
-      transform: scale(0.95);
-    }
-    .count-val {
+    .input-cant {
+      width: 50px;
+      height: 32px;
+      text-align: center;
       font-size: 14px;
       font-weight: bold;
-      width: 20px;
-      text-align: center;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
     }
     .btn-send {
       width: 100%;
       background: #28a745;
       color: white;
       border: none;
-      padding: 12px;
+      padding: 14px;
       border-radius: 8px;
       font-size: 15px;
       font-weight: bold;
-      margin-top: 10px;
+      margin-top: 15px;
       cursor: pointer;
     }
   </style>
@@ -149,7 +150,6 @@
     <input type="text" id="nombreTecnico" placeholder="Ej: FRANZ BETO YARICHIMI CARTAGENA">
   </div>
 
-  <!-- Botones de Filtro por Tecnología -->
   <div class="tabs-container">
     <button class="tab-btn active" onclick="filtrar('TODOS', this)">TODOS</button>
     <button class="tab-btn" onclick="filtrar('HFC', this)">HFC</button>
@@ -171,7 +171,7 @@
       document.getElementById('nombreTecnico').value = `${u.first_name || ''} ${u.last_name || ''}`.trim();
     }
 
-    // Catálogo con Clasificación por Tecnología
+    // Catálogo completo de materiales
     const CATALOGO = [
       { nombre: "GRAMPAS", tec: "HFC" },
       { nombre: "PRECINTOS", tec: "HFC" },
@@ -218,7 +218,7 @@
           </div>
           <div class="counter">
             <button class="btn-count" onclick="cambiar('${item.nombre}', -1)">-</button>
-            <span class="count-val">${pedido[item.nombre]}</span>
+            <input type="number" class="input-cant" id="input-${item.nombre}" value="${pedido[item.nombre]}" min="0" oninput="actualizarManual('${item.nombre}', this.value)">
             <button class="btn-count" onclick="cambiar('${item.nombre}', 1)">+</button>
           </div>
         `;
@@ -227,8 +227,14 @@
     }
 
     function cambiar(nombre, delta) {
-      pedido[nombre] = Math.max(0, pedido[nombre] + delta);
-      render();
+      pedido[nombre] = Math.max(0, (parseInt(pedido[nombre]) || 0) + delta);
+      const input = document.getElementById(`input-${nombre}`);
+      if (input) input.value = pedido[nombre];
+    }
+
+    function actualizarManual(nombre, valor) {
+      const val = parseInt(valor);
+      pedido[nombre] = isNaN(val) || val < 0 ? 0 : val;
     }
 
     function filtrar(tec, btn) {
