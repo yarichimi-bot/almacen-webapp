@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Requerimiento de Materiales - DataRed</title>
+  <title>Gestión de Almacén - DataRed</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -27,6 +27,32 @@
       color: #666;
       margin-bottom: 12px;
     }
+    /* Selector de Modo (Pedido vs Devolución) */
+    .mode-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      background: #e2e8f0;
+      color: #4a5568;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
+    .mode-btn.active-pedido {
+      background: #1f497d;
+      color: white;
+    }
+    .mode-btn.active-devolucion {
+      background: #d97706;
+      color: white;
+    }
     .card-tecnico {
       background: #ffffff;
       padding: 10px 12px;
@@ -34,6 +60,9 @@
       margin-bottom: 12px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
       border-left: 4px solid #1f497d;
+    }
+    .card-tecnico.devolucion-border {
+      border-left-color: #d97706;
     }
     .card-tecnico label {
       font-size: 11px;
@@ -138,7 +167,10 @@
       margin-top: 15px;
       cursor: pointer;
     }
-    /* Estilos del Modal de Resumen */
+    .btn-send.devolucion-bg {
+      background: #d97706;
+    }
+    /* Modal de Resumen */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -191,9 +223,6 @@
       padding: 6px 0;
       border-bottom: 1px solid #e2e8f0;
     }
-    .resumen-item:last-child {
-      border-bottom: none;
-    }
     .modal-buttons {
       display: flex;
       gap: 10px;
@@ -222,11 +251,17 @@
 </head>
 <body>
 
-  <h2>DATARED GLOBAL</h2>
-  <div class="subtitle">Solicitud de Materiales de Almacén</div>
+  <h2 id="tituloPrincipal">DATARED GROUP HFC</h2>
+  <div class="subtitle" id="subtituloPrincipal">Solicitud de Materiales de Almacén</div>
 
-  <div class="card-tecnico">
-    <label for="nombreTecnico">👤 NOMBRE Y APELLIDO DEL TÉCNICO:</label>
+  <!-- Selector de Modo -->
+  <div class="mode-container">
+    <button class="mode-btn active-pedido" id="btnModoPedido" onclick="cambiarModo('PEDIDO')">📋 NUEVO PEDIDO</button>
+    <button class="mode-btn" id="btnModoDevolucion" onclick="cambiarModo('DEVOLUCION')">🔄 DEVOLUCIÓN / RETIRO</button>
+  </div>
+
+  <div class="card-tecnico" id="cardTecnicoBox">
+    <label for="nombreTecnico" id="labelTecnico">👤 NOMBRE Y APELLIDO DEL TÉCNICO:</label>
     <input type="text" id="nombreTecnico" placeholder="Ej: FRANZ BETO YARICHIMI CARTAGENA">
   </div>
 
@@ -240,18 +275,18 @@
 
   <div id="lista-materiales"></div>
 
-  <button class="btn-send" onclick="previsualizarPedido()">📋 REVISAR Y CONFIRMAR PEDIDO</button>
+  <button class="btn-send" id="btnEnviar" onclick="previsualizarPedido()">📋 REVISAR Y CONFIRMAR PEDIDO</button>
 
-  <!-- Ventana Modal de Resumen -->
+  <!-- Modal de Resumen -->
   <div class="modal-overlay" id="modalResumen">
     <div class="modal-content">
-      <div class="modal-title">📄 RESUMEN DEL REQUERIMIENTO</div>
+      <div class="modal-title" id="modalTituloHeader">📄 RESUMEN DEL REQUERIMIENTO</div>
       <div class="modal-tech" id="modalTecnicoTexto"></div>
-      <div style="font-size: 12px; font-weight: bold; color: #333; margin-bottom: 5px;">Materiales a solicitar:</div>
+      <div style="font-size: 12px; font-weight: bold; color: #333; margin-bottom: 5px;" id="modalSublistaLabel">Materiales a solicitar:</div>
       <div class="resumen-lista" id="modalListaItems"></div>
       <div class="modal-buttons">
         <button class="btn-modal-cancel" onclick="cerrarModal()">✏️ Modificar</button>
-        <button class="btn-modal-confirm" onclick="enviarPedidoFinal()">🚀 Confirmar y Enviar</button>
+        <button class="btn-modal-confirm" id="btnModalConfirmar" onclick="enviarPedidoFinal()">🚀 Confirmar y Enviar</button>
       </div>
     </div>
   </div>
@@ -263,6 +298,36 @@
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
       const u = tg.initDataUnsafe.user;
       document.getElementById('nombreTecnico').value = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+    }
+
+    let modoActual = "PEDIDO"; // "PEDIDO" o "DEVOLUCION"
+
+    function cambiarModo(modo) {
+      modoActual = modo;
+      const btnP = document.getElementById('btnModoPedido');
+      const btnD = document.getElementById('btnModoDevolucion');
+      const cardBox = document.getElementById('cardTecnicoBox');
+      const btnEnv = document.getElementById('btnEnviar');
+      const tit = document.getElementById('tituloPrincipal');
+      const sub = document.getElementById('subtituloPrincipal');
+
+      if (modo === "PEDIDO") {
+        btnP.className = "mode-btn active-pedido";
+        btnD.className = "mode-btn";
+        cardBox.className = "card-tecnico";
+        btnEnv.className = "btn-send";
+        btnEnv.innerText = "📋 REVISAR Y CONFIRMAR PEDIDO";
+        tit.innerText = "DATARED GROUP HFC";
+        sub.innerText = "Solicitud de Materiales de Almacén";
+      } else {
+        btnD.className = "mode-btn active-devolucion";
+        btnP.className = "mode-btn";
+        cardBox.className = "card-tecnico devolucion-border";
+        btnEnv.className = "btn-send devolucion-bg";
+        btnEnv.innerText = "🔄 REVISAR Y CONFIRMAR DEVOLUCIÓN";
+        tit.innerText = "DATARED GLOBAL - DEVOLUCIONES";
+        sub.innerText = "Acta de Retiro / Materiales Dañados";
+      }
     }
 
     const CATALOGO = [
@@ -390,18 +455,20 @@
     function previsualizarPedido() {
       const nombreInput = document.getElementById('nombreTecnico').value.trim();
       if (!nombreInput) {
-        alert("⚠️ Por favor ingrese su Nombre y Apellido completo.");
+        alert("⚠️ Por favor ingrese su Nombre y Apellido.");
         return;
       }
 
       const seleccionados = obtenerSeleccionados();
       if (seleccionados.length === 0) {
-        alert("⚠️ Por favor seleccione al menos un material antes de revisar.");
+        alert("⚠️ Por favor seleccione al menos un ítem.");
         return;
       }
 
-      // Rellenar Modal
-      document.getElementById('modalTecnicoTexto').innerHTML = `<b>Técnico:</b> ${nombreInput}`;
+      document.getElementById('modalTituloHeader').innerText = modoActual === "PEDIDO" ? "📄 RESUMEN DEL REQUERIMIENTO" : "🔄 RESUMEN DE DEVOLUCIÓN";
+      document.getElementById('modalTecnicoTexto').innerHTML = `<b>Técnico:</b> ${nombreInput} <br><b>Tipo:</b> ${modoActual === "PEDIDO" ? "Nuevo Pedido" : "Devolución / Retiro"}`;
+      document.getElementById('modalSublistaLabel').innerText = modoActual === "PEDIDO" ? "Materiales a solicitar:" : "Materiales a devolver/retirar:";
+      
       const listaDiv = document.getElementById('modalListaItems');
       listaDiv.innerHTML = '';
 
@@ -424,6 +491,7 @@
       const seleccionados = obtenerSeleccionados();
 
       const payload = {
+        modo: modoActual,
         tecnico: nombreInput,
         items: seleccionados
       };
