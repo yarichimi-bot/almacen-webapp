@@ -88,7 +88,7 @@
     .item-info {
       display: flex;
       flex-direction: column;
-      max-width: 58%;
+      max-width: 55%;
     }
     .item-name {
       font-weight: 600;
@@ -117,7 +117,7 @@
       cursor: pointer;
     }
     .input-cant {
-      width: 50px;
+      width: 55px;
       height: 32px;
       text-align: center;
       font-size: 14px;
@@ -152,10 +152,10 @@
 
   <div class="tabs-container">
     <button class="tab-btn active" onclick="filtrar('TODOS', this)">TODOS</button>
+    <button class="tab-btn" onclick="filtrar('DTH', this)">DTH</button>
     <button class="tab-btn" onclick="filtrar('HFC', this)">HFC</button>
     <button class="tab-btn" onclick="filtrar('FTTH', this)">FTTH</button>
-    <button class="tab-btn" onclick="filtrar('DTH', this)">DTH</button>
-    <button class="tab-btn" onclick="filtrar('EQUIPOS', this)">EQUIPOS</button>
+    <button class="tab-btn" onclick="filtrar('GENERAL', this)">GENERAL</button>
   </div>
 
   <div id="lista-materiales"></div>
@@ -171,27 +171,72 @@
       document.getElementById('nombreTecnico').value = `${u.first_name || ''} ${u.last_name || ''}`.trim();
     }
 
-    // Catálogo completo de materiales
+    // Catálogo completo extraído de tu archivo Excel oficial
     const CATALOGO = [
-      { nombre: "GRAMPAS", tec: "HFC" },
-      { nombre: "PRECINTOS", tec: "HFC" },
-      { nombre: "TIGO", tec: "HFC" },
-      { nombre: "MARQUILLAS", tec: "HFC" },
-      { nombre: "PERNO", tec: "DTH" },
-      { nombre: "TARUGO", tec: "DTH" },
-      { nombre: "CINTA AISLANTE", tec: "HFC" },
-      { nombre: "VULCANIZANTE", tec: "HFC" },
-      { nombre: "CLAMP Q-SPAM", tec: "FTTH" },
+      // DTH
+      { nombre: "FLEXSWITCH AMPLIFICADOR", tec: "DTH" },
+      { nombre: "ANTENA PARABOLICA 0,9M", tec: "DTH" },
+      { nombre: "ANTENA OFF-SET", tec: "DTH" },
+      { nombre: "CTRL SMK PRO14", tec: "DTH" },
+      { nombre: "CTRL KAON", tec: "DTH" },
+      { nombre: "CTRL LOGO TIGO", tec: "DTH" },
+      { nombre: "CTRL AFACOM", tec: "DTH" },
+      { nombre: "CTRL TIVO S4", tec: "DTH" },
+      { nombre: "DERIVADOR ICT 10DB", tec: "DTH" },
+      { nombre: "DERIVADOR ICT 15DB", tec: "DTH" },
+      { nombre: "FLEXSWITCH 2 SALIDAS", tec: "DTH" },
+      { nombre: "FUENTE 1A", tec: "DTH" },
+      { nombre: "FUENTE 1.25A", tec: "DTH" },
+      { nombre: "FUENTE 1.5A", tec: "DTH" },
+      { nombre: "FUENTE 2A", tec: "DTH" },
+      { nombre: "FUENTE 2.5A", tec: "DTH" },
+      { nombre: "FUENTE 3A", tec: "DTH" },
+      { nombre: "FUENTE 15VDC/3A", tec: "DTH" },
+      { nombre: "HDMI", tec: "DTH" },
+      { nombre: "HDMI PREMIUM 1", tec: "DTH" },
+      { nombre: "LNBX2", tec: "DTH" },
+      { nombre: "LNBX4", tec: "DTH" },
+      { nombre: "CONVERSOR LNB QUATTRO", tec: "DTH" },
       { nombre: "RCA", tec: "DTH" },
-      { nombre: "CABLE RG6 CON PORTANTE", tec: "HFC" },
-      { nombre: "CABLE RG6 SIN PORTANTE", tec: "HFC" },
+      { nombre: "SPLITTER ICT 2 SAL", tec: "DTH" },
+      { nombre: "SMART CARD CONAX DTH", tec: "DTH" },
+
+      // HFC
+      { nombre: "CABLERG6 CON PORTANTE", tec: "HFC" },
+      { nombre: "CABLERG6 SIN PORTANTE", tec: "HFC" },
+      { nombre: "CABLE BLANCO S/P", tec: "HFC" },
+      { nombre: "CLAMP Q-SPAM", tec: "HFC" },
       { nombre: "CONECTOR INTERNO", tec: "HFC" },
+      { nombre: "CTRL ANDROID", tec: "HFC" },
+      { nombre: "FILTRO ARCOM", tec: "HFC" },
       { nombre: "SPLITTER X2", tec: "HFC" },
       { nombre: "SPLITTER X3", tec: "HFC" },
+      { nombre: "AMPLIFICADOR 15DB", tec: "HFC" },
+      { nombre: "ATENUADOR 10 DB", tec: "HFC" },
       { nombre: "CARGA TERMINAL 75 Ohm", tec: "HFC" },
-      { nombre: "HDMI PREMIUM 1", tec: "HFC" },
-      { nombre: "MODEM", tec: "EQUIPOS" },
-      { nombre: "DECO", tec: "EQUIPOS" }
+
+      // FTTH
+      { nombre: "CABLE UTP", tec: "FTTH" },
+      { nombre: "ROSETA HTB2", tec: "FTTH" },
+      { nombre: "CONECTOR APC", tec: "FTTH" },
+      { nombre: "CONECTOR RJ45", tec: "FTTH" },
+      { nombre: "DROP 100M", tec: "FTTH" },
+      { nombre: "DROP 200M", tec: "FTTH" },
+      { nombre: "PATCHCORD", tec: "FTTH" },
+      { nombre: "TENSORES", tec: "FTTH" },
+
+      // GENERAL / SIN ITEM
+      { nombre: "GRAMPAS", tec: "GENERAL" },
+      { nombre: "PRECINTOS", tec: "GENERAL" },
+      { nombre: "TIGO", tec: "GENERAL" },
+      { nombre: "TUBO PASACABLE", tec: "GENERAL" },
+      { nombre: "MARQUILLAS", tec: "GENERAL" },
+      { nombre: "PERNOS PARA ANTENA", tec: "GENERAL" },
+      { nombre: "TARUGOS", tec: "GENERAL" },
+      { nombre: "CINTA AISLANTE", tec: "GENERAL" },
+      { nombre: "VULCANIZANTE", tec: "GENERAL" },
+      { nombre: "MODEM", tec: "GENERAL" },
+      { nombre: "DECO", tec: "GENERAL" }
     ];
 
     const pedido = {};
