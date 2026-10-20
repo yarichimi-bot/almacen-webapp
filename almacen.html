@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajuste de Almacén</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1f2937; color: #f3f4f6; margin: 0; padding: 15px; }
+    h2 { font-size: 1.1rem; color: #60a5fa; margin-top: 0; margin-bottom: 5px; }
+    .sub { font-size: 0.85rem; color: #9ca3af; margin-bottom: 15px; }
+    .card { background: #374151; border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .item-title { font-weight: bold; font-size: 0.95rem; }
+    .item-solicitado { font-size: 0.8rem; color: #fbbf24; margin-top: 2px; }
+    .input-cant { width: 70px; padding: 8px; font-size: 1rem; border-radius: 6px; border: 1px solid #4b5563; background: #1f2937; color: #fff; text-align: center; }
+    .btn-submit { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; margin-top: 15px; cursor: pointer; }
+    .btn-submit:active { background: #1d4ed8; }
+  </style>
+</head>
+<body>
+
+  <h2>✏️ Ajuste de Entrega Real - Pañol</h2>
+  <div class="sub" id="infoOrden">Cargando datos de la orden...</div>
+
+  <form id="formAjuste">
+    <div id="listaItems"></div>
+    <button type="button" class="btn-submit" onclick="guardarAjuste()">💾 Confirmar Entrega Real</button>
+  </form>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const ordenId = urlParams.get('orden_id') || '0';
+    const itemsRaw = urlParams.get('items') || '[]';
+    
+    let itemsOriginales = [];
+    try {
+      itemsOriginales = JSON.parse(decodeURIComponent(itemsRaw));
+    } catch(e) { console.error(e); }
+
+    document.getElementById('infoOrden').innerText = `Orden #${ordenId} - Modifica las cantidades reales a entregar:`;
+
+    const contenedor = document.getElementById('listaItems');
+    itemsOriginales.forEach((item, index) => {
+      contenedor.innerHTML += `
+        <div class="card">
+          <div>
+            <div class="item-title">${item.nombre}</div>
+            <div class="item-solicitado">Pedido orig: ${item.cantidad} u.</div>
+          </div>
+          <input type="number" min="0" max="${item.cantidad}" id="cant_${index}" value="${item.cantidad}" class="input-cant">
+        </div>
+      `;
+    });
+
+    function guardarAjuste() {
+      const itemsAjustados = itemsOriginales.map((item, index) => {
+        const cantEntregada = parseInt(document.getElementById(`cant_${index}`).value) || 0;
+        return {
+          nombre: item.nombre,
+          cantidad_pedida: item.cantidad,
+          cantidad: cantEntregada
+        };
+      });
+
+      const payload = {
+        accion: "AJUSTE_ALMACEN",
+        orden_id: ordenId,
+        items: itemsAjustados
+      };
+
+      tg.sendData(JSON.stringify(payload));
+      tg.close();
+    }
+  </script>
+</body>
+</html>
