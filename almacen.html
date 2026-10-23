@@ -1,79 +1,248 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ajuste de Almacén</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1f2937; color: #f3f4f6; margin: 0; padding: 15px; }
-    h2 { font-size: 1.1rem; color: #60a5fa; margin-top: 0; margin-bottom: 5px; }
-    .sub { font-size: 0.85rem; color: #9ca3af; margin-bottom: 15px; }
-    .card { background: #374151; border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .item-title { font-weight: bold; font-size: 0.95rem; }
-    .item-solicitado { font-size: 0.8rem; color: #fbbf24; margin-top: 2px; }
-    .input-cant { width: 70px; padding: 8px; font-size: 1rem; border-radius: 6px; border: 1px solid #4b5563; background: #1f2937; color: #fff; text-align: center; }
-    .btn-submit { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; margin-top: 15px; cursor: pointer; }
-    .btn-submit:active { background: #1d4ed8; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuste de Almacén</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #18191a;
+            color: #e4e6eb;
+            margin: 0;
+            padding: 15px;
+        }
+        h2 {
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        p.subtitle {
+            font-size: 0.85rem;
+            color: #b0b3b8;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-bottom: 80px;
+        }
+        .item-card {
+            background-color: #242526;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .item-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-name {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #ffffff;
+        }
+        .item-orig {
+            font-size: 0.75rem;
+            color: #b0b3b8;
+        }
+        .controls-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        input[type="number"], input[type="text"] {
+            background-color: #3a3b3c;
+            border: 1px solid #4e4f50;
+            color: #ffffff;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+        }
+        input[type="number"] {
+            width: 80px;
+        }
+        input[type="text"] {
+            flex: 1;
+        }
+        .btn-quitar {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .add-section {
+            background-color: #242526;
+            border: 2px dashed #4e4f50;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .btn-agregar {
+            background-color: #2ea043;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .footer-btn {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #18191a;
+            padding: 12px 15px;
+            box-sizing: border-box;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+        }
+        .btn-confirmar {
+            background-color: #1f6feb;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
-  <h2>✏️ Ajuste de Entrega Real - Pañol</h2>
-  <div class="sub" id="infoOrden">Cargando datos de la orden...</div>
+    <h2>✏️ Ajuste de Entrega Real - Pañol</h2>
+    <p class="subtitle" id="sub-orden">Cargando datos de la orden...</p>
 
-  <form id="formAjuste">
-    <div id="listaItems"></div>
-    <button type="button" class="btn-submit" onclick="guardarAjuste()">💾 Confirmar Entrega Real</button>
-  </form>
+    <div class="container" id="items-container">
+        <!-- Los ítems se cargarán dinámicamente aquí -->
+    </div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const ordenId = urlParams.get('orden_id') || '0';
-    const itemsRaw = urlParams.get('items') || '[]';
-    
-    let itemsOriginales = [];
-    try {
-      itemsOriginales = JSON.parse(decodeURIComponent(itemsRaw));
-    } catch(e) { console.error(e); }
-
-    document.getElementById('infoOrden').innerText = `Orden #${ordenId} - Modifica las cantidades reales a entregar:`;
-
-    const contenedor = document.getElementById('listaItems');
-    itemsOriginales.forEach((item, index) => {
-      contenedor.innerHTML += `
-        <div class="card">
-          <div>
-            <div class="item-title">${item.nombre}</div>
-            <div class="item-solicitado">Pedido orig: ${item.cantidad} u.</div>
-          </div>
-          <input type="number" min="0" max="${item.cantidad}" id="cant_${index}" value="${item.cantidad}" class="input-cant">
+    <!-- Sección para agregar nuevos materiales -->
+    <div class="add-section">
+        <span style="font-size: 0.85rem; font-weight: bold; color: #a0a0a0;">➕ ¿Olvidó algún material? Agréguelo aquí:</span>
+        <div class="controls-row">
+            <input type="text" id="nuevo-nombre" placeholder="Nombre del material / equipo">
+            <input type="number" id="nuevo-cant" value="1" min="1">
         </div>
-      `;
-    });
+        <button class="btn-agregar" onclick="agregarNuevoItem()">➕ Añadir a la lista</button>
+    </div>
 
-    function guardarAjuste() {
-      const itemsAjustados = itemsOriginales.map((item, index) => {
-        const cantEntregada = parseInt(document.getElementById(`cant_${index}`).value) || 0;
-        return {
-          nombre: item.nombre,
-          cantidad_pedida: item.cantidad,
-          cantidad: cantEntregada
-        };
-      });
+    <div class="footer-btn">
+        <button class="btn-confirmar" onclick="enviarAjuste()">💾 Confirmar Entrega Real</button>
+    </div>
 
-      const payload = {
-        accion: "AJUSTE_ALMACEN",
-        orden_id: ordenId,
-        items: itemsAjustados
-      };
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-      tg.sendData(JSON.stringify(payload));
-      tg.close();
-    }
-  </script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const ordenId = urlParams.get('orden_id');
+        const itemsParam = urlParams.get('items');
+
+        document.getElementById('sub-orden').innerText = `Orden #${ordenId} - Modifica, agrega o elimina materiales:`;
+
+        let listaItems = [];
+
+        try {
+            if (itemsParam) {
+                listaItems = JSON.parse(decodeURIComponent(itemsParam));
+            }
+        } catch (e) {
+            console.error("Error al decodificar ítems:", e);
+        }
+
+        function renderizarItems() {
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+
+            listaItems.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-name">${item.nombre}</span>
+                        <span class="item-orig">Pedido orig: ${item.cantidad} u.</span>
+                    </div>
+                    <div class="controls-row">
+                        <input type="number" id="cant-${index}" value="${item.cantidad}" min="0" style="flex:1;">
+                        <button class="btn-quitar" onclick="eliminarItem(${index})">🗑️ Quitar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function eliminarItem(index) {
+            listaItems.splice(index, 1);
+            renderizarItems();
+        }
+
+        function agregarNuevoItem() {
+            const nombreInput = document.getElementById('nuevo-nombre');
+            const cantInput = document.getElementById('nuevo-cant');
+            
+            const nombre = nombreInput.value.trim().toUpperCase();
+            const cantidad = parseInt(cantInput.value) || 1;
+
+            if (!nombre) {
+                alert("Por favor escribe el nombre del material.");
+                return;
+            }
+
+            listaItems.push({ nombre: nombre, cantidad: cantidad, cantidad_pedida: 0 });
+            nombreInput.value = '';
+            cantInput.value = '1';
+            renderizarItems();
+        }
+
+        function enviarAjuste() {
+            const itemsActualizados = [];
+
+            listaItems.forEach((item, index) => {
+                const inputVal = document.getElementById(`cant-${index}`);
+                const nuevaCantidad = parseInt(inputVal.value) || 0;
+
+                itemsActualizados.push({
+                    nombre: item.nombre,
+                    cantidad: nuevaCantidad,
+                    cantidad_pedida: item.cantidad_pedida !== undefined ? item.cantidad_pedida : item.cantidad
+                });
+            });
+
+            const payload = {
+                accion: "AJUSTE_ALMACEN",
+                orden_id: parseInt(ordenId),
+                items: itemsActualizados
+            };
+
+            tg.sendData(JSON.stringify(payload));
+            tg.close();
+        }
+
+        renderizarItems();
+    </script>
 </body>
 </html>
