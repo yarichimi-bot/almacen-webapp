@@ -31,7 +31,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding-bottom: 80px;
+            padding-bottom: 90px;
         }
         .item-card {
             background-color: #242526;
@@ -68,11 +68,11 @@
             padding: 8px;
             border-radius: 6px;
             font-size: 1rem;
-            text-align: center;
             outline: none;
         }
         input[type="number"] {
             width: 80px;
+            text-align: center;
         }
         input[type="text"] {
             flex: 1;
@@ -137,14 +137,31 @@
     <p class="subtitle" id="sub-orden">Cargando datos de la orden...</p>
 
     <div class="container" id="items-container">
-        <!-- Los ítems se cargarán dinámicamente aquí -->
+        <!-- Ítems dinámicos -->
     </div>
 
-    <!-- Sección para agregar nuevos materiales -->
+    <!-- Sección para agregar múltiples materiales extras con Autocompletado -->
     <div class="add-section">
-        <span style="font-size: 0.85rem; font-weight: bold; color: #a0a0a0;">➕ ¿Olvidó algún material? Agréguelo aquí:</span>
+        <span style="font-size: 0.85rem; font-weight: bold; color: #a0a0a0;">➕ Agregar material extra (Escribe para buscar):</span>
         <div class="controls-row">
-            <input type="text" id="nuevo-nombre" placeholder="Nombre del material / equipo">
+            <input type="text" id="nuevo-nombre" list="materiales-sugeridos" placeholder="Ej. SPL... o CABLE...">
+            <datalist id="materiales-sugeridos">
+                <option value="CABLE RG6 CON PORTANTE">
+                <option value="CLAMP Q-SPAM">
+                <option value="CONECTOR INTERNO">
+                <option value="SPLITTER X2">
+                <option value="SPLITTER X4">
+                <option value="CARGA TERMINAL 75 Ohm">
+                <option value="GRAMPAS">
+                <option value="PRECINTOS">
+                <option value="TIGO">
+                <option value="PERNOS PARA ANTENA">
+                <option value="TARUGOS">
+                <option value="MODEM">
+                <option value="DECO">
+                <option value="PATCH CORD FIBRA">
+                <option value="ROSETA ÓPTICA">
+            </datalist>
             <input type="number" id="nuevo-cant" value="1" min="1">
         </div>
         <button class="btn-agregar" onclick="agregarNuevoItem()">➕ Añadir a la lista</button>
@@ -184,7 +201,7 @@
                 card.innerHTML = `
                     <div class="item-info">
                         <span class="item-name">${item.nombre}</span>
-                        <span class="item-orig">Pedido orig: ${item.cantidad} u.</span>
+                        <span class="item-orig">${item.cantidad_pedida !== undefined ? 'Pedido orig: ' + item.cantidad_pedida + ' u.' : 'Material Extra ➕'}</span>
                     </div>
                     <div class="controls-row">
                         <input type="number" id="cant-${index}" value="${item.cantidad}" min="0" style="flex:1;">
@@ -208,14 +225,18 @@
             const cantidad = parseInt(cantInput.value) || 1;
 
             if (!nombre) {
-                alert("Por favor escribe el nombre del material.");
+                alert("Por favor seleccione o escriba el nombre del material.");
                 return;
             }
 
+            // Agrega a la lista manteniendo el registro de que fue agregado extra (cantidad_pedida: 0)
             listaItems.push({ nombre: nombre, cantidad: cantidad, cantidad_pedida: 0 });
+            
+            // Limpia los campos para poder seguir agregando otro más si lo desea
             nombreInput.value = '';
             cantInput.value = '1';
             renderizarItems();
+            nombreInput.focus();
         }
 
         function enviarAjuste() {
